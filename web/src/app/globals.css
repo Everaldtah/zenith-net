@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #07090f;
+  --color-panel: #0d1119;
+  --color-panel-2: #131926;
+  --color-line: #212a3c;
+  --color-ink: #e8ebf3;
+  --color-muted: #8b94a9;
+  --color-accent: #2b8cff;
+  --color-accent-2: #8b5cf6;
+  --color-ok: #34d399;
+  --color-warn: #f5a524;
+  --color-bad: #f43f5e;
+  --font-display: var(--font-oxanium), ui-sans-serif, system-ui;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui;
+}
+
+html { color-scheme: dark; }
+body { background: var(--color-bg); color: var(--color-ink); }
+::selection { background: color-mix(in srgb, var(--color-accent) 45%, transparent); }
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition
+      border border-line bg-panel-2 text-ink hover:border-accent/60 hover:bg-[#182033] disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-primary {
+    @apply border-transparent bg-accent text-white hover:bg-[#4a9dff] hover:border-transparent shadow-[0_0_24px_-6px] shadow-accent/60;
+  }
+  .btn-ghost { @apply border-transparent bg-transparent hover:bg-panel-2; }
+  .btn-danger { @apply hover:border-bad/70 hover:text-bad; }
+  .btn-lg { @apply px-6 py-3 text-base; }
+  .input {
+    @apply w-full rounded-md border border-line bg-[#0a0e16] px-3 py-2 text-sm text-ink placeholder:text-muted/70
+      outline-none focus:border-accent focus:ring-2 focus:ring-accent/25;
+  }
+  .label { @apply mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted; }
+  .card { @apply rounded-xl border border-line bg-panel; }
+  .h-display { @apply font-display font-bold tracking-wide; }
+  .link { @apply text-accent hover:underline underline-offset-2; }
+  .eyebrow { @apply font-display text-xs font-semibold uppercase tracking-[0.2em] text-accent; }
+}
+
+/* use as: btn btn-primary / btn btn-ghost / btn btn-danger / btn btn-lg */
+/* forum post bodies (markdown) */
+.post-body { overflow-wrap: anywhere; line-height: 1.65; }
+.post-body > * + * { margin-top: 0.75em; }
+.post-body a { color: var(--color-accent); text-decoration: underline; text-underline-offset: 2px; }
+.post-body code { background: #0a0e16; border: 1px solid var(--color-line); border-radius: 4px; padding: 0.1em 0.35em; font-size: 0.9em; }
+.post-body pre { background: #0a0e16; border: 1px solid var(--color-line); border-radius: 8px; padding: 0.8em 1em; overflow-x: auto; }
+.post-body pre code { border: 0; padding: 0; background: none; }
+.post-body blockquote { border-left: 3px solid var(--color-line); padding-left: 0.9em; color: var(--color-muted); }
+.post-body ul { list-style: disc; padding-left: 1.4em; }
+.post-body ol { list-style: decimal; padding-left: 1.4em; }
+.post-body h1, .post-body h2, .post-body h3 { font-family: var(--font-display); font-weight: 700; }
+.post-body h1 { font-size: 1.35em; } .post-body h2 { font-size: 1.2em; } .post-body h3 { font-size: 1.05em; }
+.post-body img { max-width: 100%; border-radius: 6px; }
+.post-body table { border-collapse: collapse; } .post-body td, .post-body th { border: 1px solid var(--color-line); padding: 0.3em 0.6em; }

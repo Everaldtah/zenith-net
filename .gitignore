@@ -1,0 +1,10 @@
+node_modules/
+.env
+.env.*
+!.env.example
+.vercel/
+web/.next/
+web/next-env.d.ts
+launcher/dist/
+launcher/out/
+*.log

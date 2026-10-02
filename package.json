@@ -1,0 +1,13 @@
+{
+  "name": "zenith-net",
+  "private": true,
+  "description": "Zenith.net: website + API (web/), Windows launcher (launcher/), database (supabase/)",
+  "type": "module",
+  "scripts": {
+    "migrate": "node scripts/migrate.mjs",
+    "publish-build": "node scripts/publish.mjs"
+  },
+  "dependencies": {
+    "pg": "^8.23.1"
+  }
+}
