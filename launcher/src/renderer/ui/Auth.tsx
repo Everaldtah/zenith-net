@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { zenith } from '../lib/bridge';
 import { sb } from '../lib/sb';
+import banner from '../assets/auth-banner.webp';
 import { GoogleIcon, LogoMark, Notice, SITE } from './bits';
 
 type Mode = 'choose' | 'register' | 'code' | 'login' | 'google';
@@ -88,7 +89,7 @@ export function AuthScreen() {
   return (
     <div className="grid min-h-0 flex-1 grid-cols-[1fr_460px]">
       <div className="relative overflow-hidden">
-        <img src={`${SITE}/games/zenith-umbra/banner.webp`} alt="" className="absolute inset-0 h-full w-full object-cover opacity-60" draggable={false} />
+        <img src={banner} alt="" className="absolute inset-0 h-full w-full object-cover opacity-60" draggable={false} />
         <div className="absolute inset-0 bg-gradient-to-r from-bg/30 via-bg/50 to-bg" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-bg to-transparent" />
         <div className="absolute bottom-10 left-10 max-w-md">

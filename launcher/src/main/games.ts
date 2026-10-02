@@ -1,6 +1,6 @@
 // Installs, updates, uninstalls and launches game editions. Builds are the games' own NSIS installers on GitHub Releases,
 // run silently into a folder the launcher picks (/S /D=dir), so a game installed by hand and one installed here are the same.
-import { app } from 'electron';
+import { app, shell } from 'electron';
 import { spawn, type ChildProcess } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -85,6 +85,7 @@ export async function install(e: CatalogEdition, emit: (ev: JobEvent) => void) {
     fs.mkdirSync(path.dirname(dir), { recursive: true });
     await runNsis(setup, ['/S', `/D=${dir}`]);
     if (!fs.existsSync(path.join(dir, e.exe))) throw new Error('The installer finished but the game files are missing');
+    repairShortcuts(dir, e.exe);
     setInstall(k, { dir, version: build.version, installedAt: new Date().toISOString() });
     fs.rmSync(setup, { force: true });
     send({ phase: 'done' });
@@ -97,6 +98,28 @@ export async function install(e: CatalogEdition, emit: (ev: JobEvent) => void) {
 }
 
 export function cancel(k: string) { jobs.get(k)?.abort.abort(); }
+
+/**
+ * Some game installers make Desktop / Start menu shortcuts to '<product name>.exe', which doesn't exist (the real exe
+ * has another name). Point any shortcut into this install folder whose target is missing at the game's exe.
+ */
+function repairShortcuts(dir: string, exe: string) {
+  const target = path.join(dir, exe);
+  const folders = [app.getPath('desktop'), path.join(app.getPath('appData'), 'Microsoft', 'Windows', 'Start Menu', 'Programs')];
+  for (const folder of folders) {
+    let names: string[] = [];
+    try { names = fs.readdirSync(folder).filter(f => f.toLowerCase().endsWith('.lnk')); } catch { continue; }
+    for (const n of names) {
+      const lnk = path.join(folder, n);
+      try {
+        const s = shell.readShortcutLink(lnk);
+        if (s.target && path.resolve(s.target).toLowerCase().startsWith(path.resolve(dir).toLowerCase() + path.sep) && !fs.existsSync(s.target)) {
+          shell.writeShortcutLink(lnk, 'update', { target, cwd: dir, icon: target, iconIndex: 0 });
+        }
+      } catch { /* not a readable shortcut */ }
+    }
+  }
+}
 
 /** Refuses anything that doesn't look like a game folder, so a bad path can never wipe something else. */
 function safeToDelete(dir: string, exe: string) {

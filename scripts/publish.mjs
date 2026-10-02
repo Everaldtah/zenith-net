@@ -23,8 +23,9 @@ if (!version || !file || (!launcher && !game)) {
 }
 if (!fs.existsSync(file)) throw new Error(`no such file: ${file}`);
 
+const uploadOnly = process.argv.includes('--upload-only');      // put the file on GitHub now, add it to the catalog later
 const { url: supabaseUrl, serviceKey } = loadEnv();
-if (!supabaseUrl || !serviceKey) throw new Error('Supabase credentials missing: run `npx vercel env pull .env.local` in web/');
+if (!uploadOnly && (!supabaseUrl || !serviceKey)) throw new Error('Supabase credentials missing: run `npx vercel env pull .env.local` in web/');
 
 // 1. fingerprint
 const size = fs.statSync(file).size;
@@ -41,9 +42,15 @@ const gh = (...a) => execFileSync('gh', a, { stdio: ['ignore', 'pipe', 'pipe'], 
 let exists = true;
 try { gh('release', 'view', tag, '--repo', REPO); } catch { exists = false; }
 if (!exists) gh('release', 'create', tag, '--repo', REPO, '--title', title, '--notes', notes || title, '--latest=false');
-console.log(`uploading to ${REPO} release ${tag} ...`);
-execFileSync('gh', ['release', 'upload', tag, file, '--repo', REPO, '--clobber'], { stdio: 'inherit' });
+const assets = JSON.parse(gh('release', 'view', tag, '--repo', REPO, '--json', 'assets')).assets;
+if (assets.some(a => a.name === path.basename(file) && a.size === size)) console.log(`already on ${REPO} release ${tag}, not uploading again`);
+else {
+  console.log(`uploading to ${REPO} release ${tag} ...`);
+  execFileSync('gh', ['release', 'upload', tag, file, '--repo', REPO, '--clobber'], { stdio: 'inherit' });
+}
 const url = `https://github.com/${REPO}/releases/download/${tag}/${encodeURIComponent(path.basename(file))}`;
+if (uploadOnly) { console.log(`uploaded (not in the catalog yet)
+  ${url}`); process.exit(0); }
 
 // 3. catalog row (upsert, so re-publishing the same version replaces it)
 const table = launcher ? 'launcher_releases' : 'game_builds';

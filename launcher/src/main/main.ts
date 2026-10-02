@@ -22,6 +22,7 @@ let pendingLink: string | null = null;
 
 // ------------------------------------------------------------------ single instance + zenithnet:// links
 if (!app.requestSingleInstanceLock()) app.exit(0);
+app.setAppUserModelId('net.zenith.launcher');      // Windows shows the launcher's notifications only with this set
 
 if (process.defaultApp) app.setAsDefaultProtocolClient(PROTOCOL, process.execPath, [path.resolve(process.argv[1] ?? '.')]);
 else app.setAsDefaultProtocolClient(PROTOCOL);
@@ -161,9 +162,11 @@ ipcMain.handle('catalog:get', async () => {
   return c;
 });
 ipcMain.handle('games:status', () => games.status(catalogEditions));
-ipcMain.handle('games:install', (_e, key: string) => { games.install(editionFor(key), emitJob); });
+// errors before a job starts (already busy, game running...) go to the UI the same way as job errors
+const jobError = (key: string) => (err: Error) => emitJob({ key, phase: 'error', error: err.message });
+ipcMain.handle('games:install', (_e, key: string) => { games.install(editionFor(key), emitJob).catch(jobError(key)); });
 ipcMain.handle('games:cancel', (_e, key: string) => games.cancel(key));
-ipcMain.handle('games:uninstall', (_e, key: string) => games.uninstall(editionFor(key), emitJob));
+ipcMain.handle('games:uninstall', (_e, key: string) => { games.uninstall(editionFor(key), emitJob).catch(jobError(key)); });
 ipcMain.handle('games:locate', async (_e, key: string) => {
   const e = editionFor(key);
   const r = await dialog.showOpenDialog(win!, { title: `Find the folder that contains ${e.exe}`, properties: ['openDirectory'] });

@@ -4,9 +4,9 @@ import tailwindcss from '@tailwindcss/vite';
 import path from 'node:path';
 
 export default defineConfig({
-  root: path.resolve(__dirname, 'src/renderer'),
-  envDir: __dirname,
+  root: path.resolve(import.meta.dirname, 'src/renderer'),
+  envDir: import.meta.dirname,
   base: './',
   plugins: [react(), tailwindcss()],
-  build: { outDir: path.resolve(__dirname, 'dist/renderer'), emptyOutDir: true, target: 'chrome130', assetsInlineLimit: 0 },
+  build: { outDir: path.resolve(import.meta.dirname, 'dist/renderer'), emptyOutDir: true, target: 'chrome130', assetsInlineLimit: 0 },
 });

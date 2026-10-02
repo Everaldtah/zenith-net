@@ -13,7 +13,7 @@ for (const k of ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY', 'VITE_SITE_URL']
 const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
 
 fs.rmSync(path.join(ROOT, 'dist'), { recursive: true, force: true });
-await vite({ configFile: path.join(ROOT, 'vite.config.ts'), logLevel: 'warn' });
+await vite({ configFile: path.join(ROOT, 'vite.config.mts'), logLevel: 'warn' });
 const common = { bundle: true, platform: 'node', format: 'cjs', target: 'node22', external: ['electron'], logLevel: 'warning', legalComments: 'none' };
 await esbuild({ ...common, entryPoints: [path.join(ROOT, 'src/main/main.ts')], outfile: path.join(ROOT, 'dist/main.cjs'), define: { __SITE__: JSON.stringify(env.VITE_SITE_URL) } });
 await esbuild({ ...common, entryPoints: [path.join(ROOT, 'src/preload/preload.ts')], outfile: path.join(ROOT, 'dist/preload.cjs') });
@@ -25,7 +25,7 @@ const { packager } = await import('@electron/packager');
 const [appDir] = await packager({
   dir: ROOT, out: path.join(ROOT, 'out'), overwrite: true, platform: 'win32', arch: 'x64',
   name: 'ZenithNet', executableName: 'ZenithNet', icon: path.join(ROOT, 'build/icon.ico'), asar: true, prune: false,
-  ignore: [/^\/(src|scripts|out|build|node_modules)($|\/)/, /^\/\.env/, /^\/(tsconfig\.json|vite\.config\.ts|package-lock\.json|README\.md)$/],
+  ignore: [/^\/(src|scripts|tests|out|build|node_modules)($|\/)/, /^\/\.env/, /^\/(tsconfig\.json|vite\.config\.mts|package-lock\.json|README\.md)$/],
   appVersion: pkg.version, appCopyright: 'EveraldTah',
   win32metadata: { CompanyName: 'EveraldTah', FileDescription: 'Zenith.net', ProductName: 'Zenith.net', InternalName: 'ZenithNet' },
 });
@@ -39,7 +39,8 @@ if (process.argv.includes('--installer')) {
       appId: 'net.zenith.launcher', productName: 'Zenith.net', copyright: 'EveraldTah',
       directories: { output: path.join(ROOT, 'out', 'installer') },
       protocols: [{ name: 'Zenith.net', schemes: ['zenithnet'] }],
-      win: { icon: path.join(ROOT, 'build/icon.ico'), signAndEditExecutable: false },
+      // executableName: shortcuts must point at ZenithNet.exe, not '<productName>.exe'
+      win: { icon: path.join(ROOT, 'build/icon.ico'), signAndEditExecutable: false, executableName: 'ZenithNet' },
       nsis: {
         oneClick: true, perMachine: false, runAfterFinish: true, createDesktopShortcut: true, createStartMenuShortcut: true,
         shortcutName: 'Zenith.net', artifactName: 'ZenithNet-Setup.exe', uninstallDisplayName: 'Zenith.net',
