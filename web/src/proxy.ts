@@ -24,6 +24,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // everything except static files, images and the public JSON APIs the launcher polls
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|avatars/|games/|api/catalog|.*\.(?:png|jpg|jpeg|webp|svg|ico)$).*)'],
+  // everything except static files, images (by extension) and the public catalog the launcher polls
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|api/catalog|.*\.(?:png|jpg|jpeg|webp|svg|ico)$).*)'],
 };
