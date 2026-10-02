@@ -14,6 +14,8 @@ export function Footer() {
           <Link href="/forums" className="hover:text-ink">Forums</Link>
           <Link href="/download" className="hover:text-ink">Launcher</Link>
           <Link href="/forums/zenith-launcher" className="hover:text-ink">Support</Link>
+          <Link href="/privacy" className="hover:text-ink">Privacy</Link>
+          <Link href="/terms" className="hover:text-ink">Terms</Link>
         </div>
       </div>
     </footer>

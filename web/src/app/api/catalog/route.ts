@@ -18,5 +18,5 @@ export async function GET(req: NextRequest) {
         latest: e.latest && { version: e.latest.version, url: e.latest.url, sha256: e.latest.sha256, size: e.latest.size, notes: e.latest.notes, created_at: e.latest.created_at },
       })),
     })),
-  });
+  }, { headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' } });
 }
