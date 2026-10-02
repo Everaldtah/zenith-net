@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { zenith } from '../lib/bridge';
 import { bytes, eta, newer, speed } from '../lib/format';
 import type { EditionStatus, Game, JobEvent, Party } from '../lib/types';
@@ -185,7 +186,9 @@ export function GameView(props: {
         {latest?.notes && (
           <div className="mt-5 max-w-3xl">
             <div className="label">What&apos;s new in {latest.version}</div>
-            <p className="selectable whitespace-pre-line text-sm text-[#c3c9d8]">{latest.notes}</p>
+            <div className="notes selectable text-sm text-[#c3c9d8]">
+              <ReactMarkdown components={{ a: ({ href, children }) => <a href={href} target="_blank" rel="noreferrer">{children}</a> }}>{latest.notes}</ReactMarkdown>
+            </div>
           </div>
         )}
       </div>

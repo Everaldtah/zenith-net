@@ -13,7 +13,18 @@ export function App() {
   const uid = session?.user.id;
 
   useEffect(() => {
-    sb.auth.getSession().then(({ data }) => setSession(data.session));
+    sb.auth.getSession().then(async ({ data }) => {
+      // a saved session for an account that no longer exists (deleted, or a different database): start signed out
+      if (data.session) {
+        const { error } = await sb.auth.getUser();
+        if (error && (error.status === 401 || error.status === 403 || /not.*found|does not exist/i.test(error.message))) {
+          await sb.auth.signOut({ scope: 'local' });
+          setSession(null);
+          return;
+        }
+      }
+      setSession(data.session);
+    });
     const { data } = sb.auth.onAuthStateChange((_event, s) => setSession(s));
     return () => data.subscription.unsubscribe();
   }, []);

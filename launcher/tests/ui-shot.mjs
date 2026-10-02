@@ -3,7 +3,7 @@ import { _electron as electron } from 'playwright-core';
 import path from 'node:path';
 
 const out = process.argv[2] ?? '.';
-const app = await electron.launch({ args: [path.resolve('.')], env: { ...process.env } });
+const app = await electron.launch({ args: [path.resolve('.')], env: { ...process.env, ZENITH_USER_DATA: path.join(path.resolve(out), 'ui-shot-profile') } });
 const win = await app.firstWindow();
 await win.setViewportSize?.({ width: 1280, height: 800 }).catch(() => {});
 await win.waitForTimeout(2500);

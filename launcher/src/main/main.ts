@@ -21,6 +21,8 @@ let quitting = false;
 let pendingLink: string | null = null;
 
 // ------------------------------------------------------------------ single instance + zenithnet:// links
+// tests run with their own profile (Electron ignores %APPDATA% overrides, so this is the only safe way to isolate them)
+if (process.env.ZENITH_USER_DATA) app.setPath('userData', process.env.ZENITH_USER_DATA);
 if (!app.requestSingleInstanceLock()) app.exit(0);
 app.setAppUserModelId('net.zenith.launcher');      // Windows shows the launcher's notifications only with this set
 

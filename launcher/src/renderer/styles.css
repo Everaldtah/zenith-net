@@ -54,3 +54,10 @@ input, textarea, .selectable { user-select: text; }
 .anim-in { animation: zn-in .25s ease-out both; }
 @keyframes zn-stripes { from { background-position: 0 0; } to { background-position: 40px 0; } }
 .progress-stripes { background-image: linear-gradient(45deg, rgba(255,255,255,.12) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.12) 50%, rgba(255,255,255,.12) 75%, transparent 75%); background-size: 40px 40px; animation: zn-stripes 1s linear infinite; }
+
+/* release notes (markdown) */
+.notes > * + * { margin-top: .6em; }
+.notes ul { list-style: disc; padding-left: 1.2em; }
+.notes li + li { margin-top: .35em; }
+.notes strong { color: var(--color-ink); }
+.notes a { color: var(--color-accent); text-decoration: underline; }
