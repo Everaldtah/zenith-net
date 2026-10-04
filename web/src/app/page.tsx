@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { GameCard } from '@/components/GameCard';
 import { Handle } from '@/components/Handle';
 import { getCatalog, getNews, getViewer } from '@/lib/data';
-import { timeAgo } from '@/lib/format';
+import { gameArt, timeAgo } from '@/lib/format';
 
 export const revalidate = 60;
 
@@ -18,7 +18,7 @@ export default async function Home() {
   return (
     <>
       <section className="relative isolate overflow-hidden border-b border-line">
-        <Image src="/games/zenith-umbra/banner.webp" alt="" fill priority sizes="100vw" className="-z-10 object-cover opacity-55" />
+        <Image src={gameArt('zenith-umbra', 'banner')} alt="" fill priority sizes="100vw" className="-z-10 object-cover opacity-55" />
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-bg via-bg/80 to-bg/10" />
         <div className="absolute inset-x-0 bottom-0 -z-10 h-32 bg-gradient-to-t from-bg to-transparent" />
         <div className="mx-auto max-w-6xl px-4 py-20 sm:py-28">

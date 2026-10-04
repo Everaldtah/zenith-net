@@ -6,7 +6,7 @@ import { requestFromProfile } from '@/app/actions/social';
 import { Avatar } from '@/components/Avatar';
 import { RoleBadge } from '@/components/Handle';
 import { getProfile, getProfileActivity, getSocial, getViewer } from '@/lib/data';
-import { fmtDate, handle, handlePath, hours, parseHandlePath, timeAgo } from '@/lib/format';
+import { fmtDate, gameArt, handle, handlePath, hours, parseHandlePath, timeAgo } from '@/lib/format';
 
 export async function generateMetadata(props: PageProps<'/u/[handle]'>): Promise<Metadata> {
   const h = parseHandlePath((await props.params).handle);
@@ -63,7 +63,7 @@ export default async function ProfilePage(props: PageProps<'/u/[handle]'>) {
             {activity.stats.length === 0 && <p className="card p-5 text-sm text-muted">No play time recorded yet. Time spent in games launched from the Zenith.net launcher shows up here.</p>}
             {activity.stats.map(s => (
               <Link key={s.game} href={`/games/${s.game}`} className="card flex items-center gap-4 p-4 hover:border-accent/50">
-                <Image src={`/games/${s.game}/icon.webp`} alt="" width={48} height={48} className="rounded-lg" />
+                <Image src={gameArt(s.game, 'icon')} alt="" width={48} height={48} className="rounded-lg" />
                 <div className="flex-1">
                   <div className="font-semibold">{s.games?.name ?? s.game}</div>
                   <div className="text-xs text-muted">Last played {timeAgo(s.last_played)} · {s.sessions} sessions</div>

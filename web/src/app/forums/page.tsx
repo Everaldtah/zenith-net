@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getBoards, getCatalog } from '@/lib/data';
-import { timeAgo } from '@/lib/format';
+import { gameArt, timeAgo } from '@/lib/format';
 import type { Board, BoardStats } from '@/lib/types';
 
 export const revalidate = 30;
@@ -41,7 +41,7 @@ export default async function Forums() {
         return (
           <section key={g.slug} className="mt-10">
             <div className="flex items-center gap-3">
-              <Image src={`/games/${g.slug}/icon.webp`} alt="" width={36} height={36} className="rounded-lg" />
+              <Image src={gameArt(g.slug, 'icon')} alt="" width={36} height={36} className="rounded-lg" />
               <h2 className="h-display text-xl">{g.name}</h2>
             </div>
             <div className="card mt-3 divide-y divide-line overflow-hidden">{mine.map(b => <BoardRow key={b.id} b={b} />)}</div>

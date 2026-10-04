@@ -35,6 +35,13 @@ export const STATUS_LABEL: Record<string, string> = {
   open: 'Open', investigating: 'Investigating', planned: 'Planned', fixed: 'Fixed', wontfix: "Won't fix", duplicate: 'Duplicate', answered: 'Answered',
 };
 
+// Game pictures live in /public/games/<slug>/<kind><version>.webp. Bump a game's version when its pictures change:
+// a new file name gets past the image optimiser, the CDN and launchers that cached the old one.
+const ART_VERSION: Record<string, string> = { 'zenith-umbra': '-v2' };
+export const gameArt = (slug: string, kind: 'banner' | 'card' | 'icon' | 'art2') => `/games/${slug}/${kind}${ART_VERSION[slug] ?? ''}.webp`;
+/** games with a second wide picture (shown on the game's page) */
+export const HAS_ART2 = new Set(['zenith-umbra']);
+
 /** avatar ids are file names in /public/avatars */
 export const AVATARS = [
   'hayate', 'tomoe', 'mirei', 'haruto', 'seiran', 'yuzu', 'kaien', 'raijin', 'enra', 'hex', 'vorn', 'nocturne', 'hibiki', 'kagemaru',
