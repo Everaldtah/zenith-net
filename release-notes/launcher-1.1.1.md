@@ -1,0 +1,1 @@
+- **Locate an existing install** is now much faster for big games: if you point the launcher at a game folder it didn't install itself (a copy from another PC or drive), it reuses the files that are already there and downloads only what is different.
