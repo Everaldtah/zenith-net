@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import { Markdown } from '@/components/Markdown';
 import { getBoards, getBuildHistory, getGame } from '@/lib/data';
 import { counters } from '@/lib/redis';
-import { bytes, fmtDate } from '@/lib/format';
+import { HAS_ART2, bytes, fmtDate, gameArt } from '@/lib/format';
 
 export const revalidate = 60;
 
@@ -27,10 +27,10 @@ export default async function GamePage(props: PageProps<'/games/[slug]'>) {
   return (
     <>
       <section className="relative isolate overflow-hidden border-b border-line">
-        <Image src={`/games/${slug}/banner.webp`} alt="" fill priority sizes="100vw" className="-z-10 object-cover opacity-60" />
+        <Image src={gameArt(slug, 'banner')} alt="" fill priority sizes="100vw" className="-z-10 object-cover opacity-60" />
         <div className="absolute inset-0 -z-10 bg-gradient-to-t from-bg via-bg/60 to-bg/20" />
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 pb-10 pt-28 sm:flex-row sm:items-end">
-          <Image src={`/games/${slug}/icon.webp`} alt="" width={96} height={96} className="rounded-2xl border border-white/10 shadow-2xl" />
+          <Image src={gameArt(slug, 'icon')} alt="" width={96} height={96} className="rounded-2xl border border-white/10 shadow-2xl" />
           <div className="flex-1">
             <div className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: g.accent }}>{g.genre}</div>
             <h1 className="h-display mt-1 text-4xl sm:text-5xl">{g.name}</h1>
@@ -47,6 +47,9 @@ export default async function GamePage(props: PageProps<'/games/[slug]'>) {
         <div>
           <h2 className="h-display text-xl">About</h2>
           <p className="mt-3 leading-relaxed text-[#c3c9d8]">{g.description}</p>
+          {HAS_ART2.has(slug) && (
+            <Image src={gameArt(slug, 'art2')} alt="" width={1280} height={560} sizes="(max-width: 1024px) 100vw, 760px" className="mt-6 rounded-xl border border-line" />
+          )}
 
           <h2 className="h-display mt-10 text-xl">Editions</h2>
           <div className="card mt-3 divide-y divide-line">

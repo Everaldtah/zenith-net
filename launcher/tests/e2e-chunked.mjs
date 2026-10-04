@@ -34,7 +34,7 @@ async function catalog(version) {
     site: SITE, launcher: null,
     games: [{
       slug: 'zz-test', name: 'Chunk Test', tagline: 'Test game for chunked installs', description: '', genre: 'Test', accent: '#2b8cff', site_url: null,
-      art: { banner: `${SITE}/games/zenith-umbra/banner.webp`, card: `${SITE}/games/zenith-umbra/card.webp`, icon: `${SITE}/games/zenith-umbra/icon.webp` },
+      art: { banner: `${SITE}/games/zenith-umbra/banner-v2.webp`, card: `${SITE}/games/zenith-umbra/card-v2.webp`, icon: `${SITE}/games/zenith-umbra/icon-v2.webp` },
       editions: [{ edition: 'main', name: 'Chunk Test', note: 'A test edition.', exe: m.exe, detect: [], online: false,
         latest: { version, url, sha256: crypto.createHash('sha256').update(raw).digest('hex'), size: m.totals.download_size, install_size: m.totals.size, kind: 'chunked', notes: `Test build ${version}` } }],
     }],
