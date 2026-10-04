@@ -13,14 +13,10 @@ const STEPS = [
   ['Play together', 'Add friends, see who is online, form a party and launch into the same lobby.'],
 ];
 
-export default async function Home(props: PageProps<'/'>) {
-  const deleted = (await props.searchParams).deleted === '1';
+export default async function Home() {
   const [games, news, { profile }] = await Promise.all([getCatalog(), getNews(4), getViewer()]);
   return (
     <>
-      {deleted && (
-        <div role="status" className="border-b border-ok/30 bg-ok/10 px-4 py-2 text-center text-sm text-[#a7f3d0]">Your Zenith.net account has been deleted.</div>
-      )}
       <section className="relative isolate overflow-hidden border-b border-line">
         <Image src="/games/zenith-umbra/banner.webp" alt="" fill priority sizes="100vw" className="-z-10 object-cover opacity-55" />
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-bg via-bg/80 to-bg/10" />

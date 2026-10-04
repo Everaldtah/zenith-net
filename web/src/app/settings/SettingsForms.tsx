@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
 import { useActionState, useState } from 'react';
-import { changePassword, deleteAccount, renameUser, saveProfile, type FormState } from '@/app/actions/profile';
+import { changePassword, renameUser, saveProfile, type FormState } from '@/app/actions/profile';
 import { Notice } from '@/components/Notice';
 import { SubmitButton } from '@/components/SubmitButton';
 import { AVATARS, avatarSrc } from '@/lib/format';
@@ -18,8 +18,6 @@ export function SettingsForms({ profile }: { profile: Profile }) {
   const [pState, pAction] = useActionState<FormState, FormData>(saveProfile, undefined);
   const [nState, nAction] = useActionState<FormState, FormData>(renameUser, undefined);
   const [pwState, pwAction] = useActionState<FormState, FormData>(changePassword, undefined);
-  const [delState, delAction] = useActionState<FormState, FormData>(deleteAccount, undefined);
-  const handle = `${profile.username}#${profile.tag}`;
 
   return (
     <div className="mt-8 space-y-8">
@@ -64,27 +62,6 @@ export function SettingsForms({ profile }: { profile: Profile }) {
           <input name="confirm" type="password" required placeholder="Confirm" autoComplete="new-password" className="input" />
         </div>
         <SubmitButton className="btn">Change password</SubmitButton>
-      </form>
-
-      <form id="delete" action={delAction} className="card space-y-4 border-bad/40 p-6">
-        <h2 className="h-display text-lg text-bad">Delete account</h2>
-        <div className="space-y-2 text-sm text-muted">
-          <p>This can&apos;t be undone. Deleting your account removes:</p>
-          <ul className="list-disc space-y-1 pl-5">
-            <li>your profile, username and play time</li>
-            <li>your friends, friend requests and party</li>
-            <li>threads you started that nobody replied to</li>
-          </ul>
-          <p>Your other posts are replaced with &ldquo;[deleted]&rdquo; and your name is taken off them, so other people&apos;s replies still make sense. Games you installed stay on your PC.</p>
-        </div>
-        <Result s={delState} />
-        <div>
-          <label className="label" htmlFor="confirm-delete">Type <span className="normal-case text-ink">{handle}</span> to confirm</label>
-          <div className="flex gap-2">
-            <input id="confirm-delete" name="confirm" required autoComplete="off" spellCheck={false} placeholder={handle} className="input" />
-            <SubmitButton className="btn shrink-0 border-bad/60 text-bad hover:border-bad hover:bg-bad/10" pendingText="Deleting…">Delete account</SubmitButton>
-          </div>
-        </div>
       </form>
     </div>
   );

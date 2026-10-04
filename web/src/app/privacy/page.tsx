@@ -9,7 +9,7 @@ export default function Privacy() {
     <article className="mx-auto max-w-3xl px-4 py-12 leading-relaxed text-[#c3c9d8] [&_h2]:h-display [&_h2]:mt-10 [&_h2]:text-xl [&_h2]:text-ink [&_li]:mt-1.5 [&_p]:mt-3 [&_ul]:mt-3 [&_ul]:list-disc [&_ul]:pl-6">
       <p className="eyebrow">Legal</p>
       <h1 className="h-display mt-2 text-3xl text-ink">Privacy policy</h1>
-      <p className="text-sm text-muted">Last updated 3 October 2026</p>
+      <p className="text-sm text-muted">Last updated 2 October 2026</p>
 
       <p>
         Zenith.net is run by EveraldTah, an independent game developer in the United Kingdom. This page explains what we
@@ -46,14 +46,13 @@ export default function Privacy() {
 
       <h2>How long we keep it</h2>
       <p>
-        For as long as your account exists. You can delete your account yourself in Settings: that removes your profile,
-        friends, party and play time at once, deletes threads you started that nobody replied to, and replaces your other
-        posts with &ldquo;[deleted]&rdquo; with your name taken off, so other people&apos;s replies still make sense.
+        For as long as your account exists. If you delete your account, we remove your profile, friends and play time.
+        Your forum posts are deleted too, unless you ask us to keep them anonymised so threads still make sense.
       </p>
 
       <h2>Your rights</h2>
       <p>
-        You can delete your account in Settings at any time. You can also ask for a copy of your data or for corrections: email{' '}
+        You can ask for a copy of your data, for corrections, or for your account and data to be deleted. Email{' '}
         <a href={`mailto:${CONTACT}`} className="link">{CONTACT}</a> from your account&apos;s address and we&apos;ll
         reply within 30 days. You can also complain to the UK Information Commissioner&apos;s Office (ico.org.uk).
       </p>
