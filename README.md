@@ -10,6 +10,7 @@ installs, updates and launches games and lets friends party up and play together
 | Database | `supabase/migrations/` | Supabase Postgres (auth, row level security, realtime) |
 | Short-lived data | Redis from the Vercel Marketplace | rate limits, download counters |
 | Game builds | GitHub Releases of this repo, one tag per build | the games' own NSIS installers |
+| Big game builds | Cloudflare R2 bucket `zenith-games` | content-addressed chunks + one manifest per build |
 
 ## How the pieces talk
 
@@ -39,8 +40,33 @@ node scripts/publish.mjs --launcher --version 1.0.1 --file launcher/out/installe
 
 The installer goes to a GitHub release (`<game>-<edition>-v<version>`), its SHA-256 and size go into
 `game_builds`, and launchers offer the update within ten minutes. Installers must be electron-builder NSIS
-installers (they're run as `Setup.exe /S /D=<folder>`). GitHub allows up to 2 GiB per file. Bigger builds go to
-Cloudflare R2: `publish.mjs` only needs a different URL.
+installers (they're run as `Setup.exe /S /D=<folder>`). GitHub allows up to 2 GiB per file.
+
+### Big builds: chunks on Cloudflare R2
+
+```bash
+node scripts/publish-chunked.mjs --game zenith-umbra --edition full --version 0.2.3 --dir <build folder> \
+     --exe "Zenith Umbra Unity.exe" --notes-file notes.md
+node scripts/publish-chunked.mjs --verify --game zenith-umbra --edition full --version 0.2.3   # read back through the public URL
+```
+
+- The folder is cut into content-defined chunks (about 4 MiB, `scripts/chunker.mjs`), each stored once as
+  `chunks/<aa>/<sha256>` (zstd). A chunk the bucket already holds is never uploaded again, so a re-run after a failure
+  and every later version only send what is new. The manifest (`manifests/<game>/<edition>/<version>.json`) lists every
+  file with its chunks and is immutable once published.
+- The catalogue row has `kind = 'chunked'`: `url` = the manifest, `sha256` = the manifest's, `size` = download size,
+  `install_size` = bytes on disk. `/api/catalog` only returns chunked builds to launchers that ask with `?chunked=1`
+  (1.1.0+); launcher 1.0.0 never sees them.
+- The launcher (`launcher/src/main/chunked.ts`) brings the install folder to the manifest's state: it hashes what is
+  on disk, reuses every chunk already there, downloads the rest 10 at a time (each verified), assembles in
+  `<install>/.zenith/staging` and moves files into place. The same routine is install, resume, update and
+  "Verify and repair files".
+- R2 credentials are in the git-ignored `.env.auth` (publishing only). Players read the public bucket URL; to move to a
+  custom domain, publish new manifests under it: the base URL lives only in the catalogue row.
+- Excluded automatically: `*_BackUpThisFolder_ButDontShipItWithYourGame`, `*_BurstDebugInformation_DoNotShip`, `.dmp`,
+  `.pdb`. Don't change `scripts/chunker.mjs` constants: new builds would stop sharing chunks with old ones.
+- Tests: `launcher/tests/chunked-engine.mjs` (engine, plain Node), `e2e-chunked.mjs` (launcher UI, kill and resume),
+  `e2e-fullgame.mjs` (sample install of a big build seeded from a local copy, for metered connections).
 
 **A new game** needs a migration that adds its `games` + `game_editions` rows and forum boards (copy
 `0002_seed.sql`), plus art in `web/public/games/<slug>/`: `banner.webp` 1280×560, `card.webp` 640×360,
