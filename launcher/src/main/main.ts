@@ -154,7 +154,9 @@ const catalogCache = () => path.join(app.getPath('userData'), 'catalog.json');
 ipcMain.handle('catalog:get', async () => {
   let c;
   try {
-    c = await getJson(`${SITE}/api/catalog`);
+    // tests: a catalogue from a file, to try builds that aren't in the live catalogue yet
+    if (process.env.ZENITH_CATALOG_FILE) c = JSON.parse(fs.readFileSync(process.env.ZENITH_CATALOG_FILE, 'utf8'));
+    else c = await getJson(`${SITE}/api/catalog?chunked=1`);      // this launcher can install chunked builds
     fs.writeFileSync(catalogCache(), JSON.stringify(c));
   } catch (err) {
     try { c = { ...JSON.parse(fs.readFileSync(catalogCache(), 'utf8')), offline: true }; } catch { throw err; }
@@ -167,6 +169,7 @@ ipcMain.handle('games:status', () => games.status(catalogEditions));
 // errors before a job starts (already busy, game running...) go to the UI the same way as job errors
 const jobError = (key: string) => (err: Error) => emitJob({ key, phase: 'error', error: err.message });
 ipcMain.handle('games:install', (_e, key: string) => { games.install(editionFor(key), emitJob).catch(jobError(key)); });
+ipcMain.handle('games:repair', (_e, key: string) => { games.install(editionFor(key), emitJob, { repair: true }).catch(jobError(key)); });
 ipcMain.handle('games:cancel', (_e, key: string) => games.cancel(key));
 ipcMain.handle('games:uninstall', (_e, key: string) => { games.uninstall(editionFor(key), emitJob).catch(jobError(key)); });
 ipcMain.handle('games:locate', async (_e, key: string) => {

@@ -9,7 +9,7 @@ export interface Zenith {
   catalog(): Promise<Catalog>;
   games: {
     status(): Promise<Record<string, EditionStatus>>;
-    install(key: string): Promise<void>; cancel(key: string): Promise<void>; uninstall(key: string): Promise<void>;
+    install(key: string): Promise<void>; repair(key: string): Promise<void>; cancel(key: string): Promise<void>; uninstall(key: string): Promise<void>;
     locate(key: string): Promise<boolean>; launch(key: string, args: string[]): Promise<boolean>;
     onJob(cb: (e: JobEvent) => void): () => void;
     onStarted(cb: (e: { key: string }) => void): () => void;

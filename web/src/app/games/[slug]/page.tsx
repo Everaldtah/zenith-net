@@ -54,12 +54,15 @@ export default async function GamePage(props: PageProps<'/games/[slug]'>) {
               <div key={e.edition} className="flex flex-wrap items-center gap-3 p-4">
                 <div className="flex-1">
                   <div className="font-semibold">{e.name}</div>
+                  {e.note && <div className="mt-0.5 max-w-xl text-sm text-muted">{e.note}</div>}
                   <div className="mt-0.5 text-xs text-muted">
-                    {e.latest ? <>Version {e.latest.version} · {bytes(e.latest.size)} · {fmtDate(e.latest.created_at)}</> : 'Coming soon to the launcher'}
+                    {e.latest ? <>Version {e.latest.version} · {e.latest.kind === 'chunked' ? `${bytes(e.latest.install_size ?? e.latest.size)} installed` : bytes(e.latest.size)} · {fmtDate(e.latest.created_at)}</> : 'Coming soon to the launcher'}
                     {e.online && <> · <span className="text-ok">Party play</span></>}
                   </div>
                 </div>
-                {e.latest && <a href={`/api/download?game=${slug}&edition=${e.edition}`} className="btn text-xs">Standalone installer</a>}
+                {e.latest && (e.latest.kind === 'chunked'
+                  ? <Link href="/download" className="btn text-xs">Install with the launcher</Link>
+                  : <a href={`/api/download?game=${slug}&edition=${e.edition}`} className="btn text-xs">Standalone installer</a>)}
               </div>
             ))}
           </div>

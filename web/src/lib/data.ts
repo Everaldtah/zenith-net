@@ -27,7 +27,11 @@ function withLatest(g: Game): Game {
     ...g,
     game_editions: [...g.game_editions]
       .sort((a, b) => a.sort - b.sort)
-      .map(e => ({ ...e, latest: [...(e.game_builds ?? [])].sort((a, b) => b.created_at.localeCompare(a.created_at))[0] ?? null })),
+      .map(e => {
+        const builds = [...(e.game_builds ?? [])].sort((a, b) => b.created_at.localeCompare(a.created_at));
+        // latestInstaller: what a launcher that can't install chunked builds (1.0.0) may be offered
+        return { ...e, latest: builds[0] ?? null, latestInstaller: builds.find(b => b.kind !== 'chunked') ?? null };
+      }),
   };
 }
 

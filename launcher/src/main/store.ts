@@ -8,6 +8,10 @@ export interface Install {
   version: string | null;   // null = found an install the launcher didn't make (version unknown)
   installedAt: string;
   external?: boolean;
+  /** installed from chunks (no NSIS uninstaller; the launcher owns the folder) */
+  chunked?: boolean;
+  /** an update or repair was interrupted: finish it before playing */
+  incomplete?: boolean;
 }
 
 export interface Settings {

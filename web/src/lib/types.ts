@@ -2,8 +2,8 @@ export type Role = 'player' | 'mod' | 'dev';
 export interface Profile { id: string; username: string; tag: number; avatar: string; bio: string; role: Role; created_at: string }
 export type MiniProfile = Pick<Profile, 'username' | 'tag' | 'avatar' | 'role'>;
 
-export interface Build { id: number; game: string; edition: string; version: string; url: string; sha256: string; size: number; notes: string; created_at: string }
-export interface Edition { game: string; edition: string; name: string; exe: string; detect: string[]; online: boolean; sort: number; game_builds?: Build[]; latest?: Build | null }
+export interface Build { id: number; game: string; edition: string; version: string; url: string; sha256: string; size: number; notes: string; created_at: string; kind?: 'installer' | 'chunked'; install_size?: number | null }
+export interface Edition { game: string; edition: string; name: string; exe: string; detect: string[]; online: boolean; sort: number; note?: string; game_builds?: Build[]; latest?: Build | null; latestInstaller?: Build | null }
 export interface Game {
   slug: string; name: string; tagline: string; description: string; genre: string; accent: string; site_url: string | null; sort: number;
   game_editions: Edition[];

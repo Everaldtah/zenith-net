@@ -14,6 +14,8 @@ export async function GET(req: NextRequest) {
   const game = (await getCatalog()).find(g => g.slug === q.get('game'));
   const ed = game?.game_editions.find(e => e.edition === q.get('edition'));
   if (!game || !ed?.latest) return NextResponse.redirect(new URL('/games', req.url));
+  // a chunked build has no single file to hand out: it installs through the launcher
+  if (ed.latest.kind === 'chunked') return NextResponse.redirect(new URL('/download', req.url));
   await bump(`dl:${game.slug}:${ed.edition}`);
   return NextResponse.redirect(ed.latest.url);
 }

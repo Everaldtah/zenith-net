@@ -27,6 +27,7 @@ const api = {
   games: {
     status: () => ipcRenderer.invoke('games:status'),
     install: (key: string) => ipcRenderer.invoke('games:install', key),
+    repair: (key: string) => ipcRenderer.invoke('games:repair', key),
     cancel: (key: string) => ipcRenderer.invoke('games:cancel', key),
     uninstall: (key: string) => ipcRenderer.invoke('games:uninstall', key),
     locate: (key: string) => ipcRenderer.invoke('games:locate', key),

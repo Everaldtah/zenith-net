@@ -1,5 +1,5 @@
-export interface BuildInfo { version: string; url: string; sha256: string; size: number; notes: string; created_at?: string }
-export interface Edition { edition: string; name: string; exe: string; detect: string[]; online: boolean; latest: BuildInfo | null }
+export interface BuildInfo { version: string; url: string; sha256: string; size: number; notes: string; created_at?: string; kind?: 'installer' | 'chunked'; install_size?: number }
+export interface Edition { edition: string; name: string; note?: string; exe: string; detect: string[]; online: boolean; latest: BuildInfo | null }
 export interface Game {
   slug: string; name: string; tagline: string; description: string; genre: string; accent: string; site_url: string | null;
   art: { banner: string; card: string; icon: string }; editions: Edition[];
@@ -8,7 +8,7 @@ export interface Catalog { site: string; launcher: BuildInfo | null; games: Game
 
 export type Phase = 'download' | 'verify' | 'install' | 'uninstall' | 'done' | 'error' | 'cancelled';
 export interface JobEvent { key: string; phase: Phase; received?: number; total?: number; speed?: number; error?: string }
-export interface EditionStatus { installed: boolean; dir: string | null; version: string | null; external: boolean; running: boolean; busy: Phase | null }
+export interface EditionStatus { installed: boolean; dir: string | null; version: string | null; external: boolean; running: boolean; busy: Phase | null; chunked: boolean; incomplete: boolean }
 
 export interface Settings { libraryDir: string; closeToTray: boolean; minimizeOnPlay: boolean; startWithWindows: boolean }
 

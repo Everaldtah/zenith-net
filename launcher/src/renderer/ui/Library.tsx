@@ -41,8 +41,9 @@ export function GameRail({ games, selected, onSelect, status }: {
 
 function Progress({ job, onCancel }: { job: JobEvent; onCancel: () => void }) {
   const pct = job.total ? Math.min(100, ((job.received ?? 0) / job.total) * 100) : 0;
+  const counted = job.phase === 'download' || (job.phase === 'verify' && !!job.total);
   const label = job.phase === 'download' ? `Downloading ${pct.toFixed(0)}%`
-    : job.phase === 'verify' ? 'Checking the download…'
+    : job.phase === 'verify' ? (job.total ? `Checking files ${pct.toFixed(0)}%` : 'Checking…')
     : job.phase === 'install' ? 'Installing…'
     : job.phase === 'uninstall' ? 'Uninstalling…' : '';
   return (
@@ -54,11 +55,11 @@ function Progress({ job, onCancel }: { job: JobEvent; onCancel: () => void }) {
         ) : null}
       </div>
       <div className="h-2.5 overflow-hidden rounded-full bg-[#0a0e16] ring-1 ring-line">
-        {job.phase === 'download'
+        {counted
           ? <div className="h-full rounded-full bg-gradient-to-r from-accent to-accent-2 transition-[width] duration-300" style={{ width: `${pct}%` }} />
           : <div className="progress-stripes h-full w-full bg-accent/70" />}
       </div>
-      {job.phase === 'download' && <button onClick={onCancel} className="mt-2 text-xs text-muted hover:text-ink">Pause (the download picks up where it stopped)</button>}
+      {counted && <button onClick={onCancel} className="mt-2 text-xs text-muted hover:text-ink">Pause (the download picks up where it stopped)</button>}
     </div>
   );
 }
@@ -118,6 +119,8 @@ export function GameView(props: {
       : <button disabled className="btn h-12 min-w-56 text-base">Coming soon</button>;
   } else if (st.running) {
     main = <button disabled className="btn h-12 min-w-56 border-ok/50 text-base text-ok !opacity-100">● Playing</button>;
+  } else if (st.incomplete) {
+    main = <button onClick={install} disabled={props.offline} className="btn btn-primary h-12 min-w-56 text-base">Resume update</button>;
   } else if (needsUpdate) {
     main = <button onClick={install} disabled={props.offline} className="btn btn-primary h-12 min-w-56 text-base">Update to {latest!.version}</button>;
   } else {
@@ -145,12 +148,14 @@ export function GameView(props: {
             <select id="edition" value={ed.edition} onChange={e => pickEdition(e.target.value)} className="input w-80">
               {g.editions.map(e => <option key={e.edition} value={e.edition}>{e.name}</option>)}
             </select>
+            {ed.note && <p className="mt-2 max-w-2xl text-sm text-muted">{ed.note}</p>}
           </div>
         )}
         <div className="flex flex-wrap items-center gap-3">
           <GearMenu items={[
             ['Show in Explorer', () => zenith.openFolder(key), !!st?.installed],
             [`Reinstall / update to ${latest?.version ?? ''}`, install, !!(st?.installed && latest && !props.offline)],
+            ['Verify and repair files', () => { props.onClearJob(key); zenith.games.repair(key); }, !!(st?.installed && latest?.kind === 'chunked' && !st.running && !props.offline)],
             ['Locate an existing install', async () => { if (await zenith.games.locate(key)) props.onClearJob(key); }, !st?.installed],
             ['Uninstall', () => setConfirmUninstall(true), !!st?.installed && !st.running],
             ['Game forums', () => props.onOpenWeb(`/forums/${g.slug}-general`)],
@@ -181,6 +186,8 @@ export function GameView(props: {
         <div className="mt-5 flex flex-wrap gap-x-8 gap-y-2 text-xs text-muted">
           {st?.installed && <span>Installed: {st.version ? `v${st.version}` : 'version unknown (installed outside the launcher)'}</span>}
           {latest && <span>Latest: v{latest.version}</span>}
+          {latest?.kind === 'chunked' && latest.install_size ? <span>Needs {bytes(latest.install_size)} of disk space</span> : null}
+          {st?.incomplete && <span className="text-warn">The last update was interrupted. Resume it to play.</span>}
           {st?.external && latest && !needsUpdate && <button onClick={install} className="text-accent hover:underline">Update to the launcher&apos;s v{latest.version}</button>}
         </div>
         {latest?.notes && (
