@@ -31,7 +31,7 @@ export function SettingsForms({ profile }: { profile: Profile }) {
             {AVATARS.map(a => (
               <button type="button" key={a} onClick={() => setAvatar(a)} aria-label={a} aria-pressed={avatar === a}
                 className={`overflow-hidden rounded-md border-2 transition ${avatar === a ? 'border-accent' : 'border-transparent opacity-70 hover:opacity-100'}`}>
-                <Image src={avatarSrc(a)} alt="" width={64} height={64} className="aspect-square w-full object-cover" />
+                <Image src={avatarSrc(a)} alt="" width={64} height={64} unoptimized className="aspect-square w-full object-cover" />
               </button>
             ))}
           </div>

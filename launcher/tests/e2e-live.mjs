@@ -30,7 +30,9 @@ let app, failed = 0;
 const step = async (name, fn) => { try { await fn(); console.log('PASS ', name); } catch (e) { failed++; console.log('FAIL ', name, '-', e.message.split('\n')[0]); } };
 
 try {
-  app = await electron.launch({ args: [path.resolve('.')], env: { ...process.env, LOCALAPPDATA: local, ZENITH_USER_DATA: roaming } });
+  // ZENITH_EXE = an installed launcher (for example the public release) instead of this checkout's dist/
+  app = await electron.launch({ ...(process.env.ZENITH_EXE ? { executablePath: process.env.ZENITH_EXE, args: [] } : { args: [path.resolve('.')] }),
+    env: { ...process.env, LOCALAPPDATA: local, ZENITH_USER_DATA: roaming } });
   const win = await app.firstWindow();
   const errors = [];
   win.on('pageerror', e => errors.push(e.message));

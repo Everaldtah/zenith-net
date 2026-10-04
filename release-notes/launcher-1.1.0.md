@@ -1,0 +1,4 @@
+- **Zenith Umbra Full Game Experience**: the full-quality edition of Zenith Umbra is now in the launcher. Pick it under "Game version" on the ZENITH//UMBRA page. The original game is now called **Zenith Umbra Lite**; your installed copy and play time carry over.
+- **Smarter downloads for big games**: the Full edition downloads in small verified pieces. If you quit or lose your connection, it continues where it stopped, and future updates only download what changed.
+- **Verify and repair files**: a new option in the gear menu checks every file of a game installed this way and re-downloads only what is damaged or missing.
+- New Zenith Umbra artwork from the Eclipse film, in the launcher and on the website.
