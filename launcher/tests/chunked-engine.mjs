@@ -67,6 +67,13 @@ check('folder equals v2 after repair', same(dir, v2));
 r = await run('0.0.1', sha1);
 check('back to v1 matches v1', same(dir, v1), brief(r));
 
+// a folder the launcher has no record of (copied install): its contents must still be reused
+fs.rmSync(dir, { recursive: true, force: true });
+fs.cpSync(v2, dir, { recursive: true, filter: s => !SKIP.test(path.relative(v2, s).split(path.sep).join('/')) });
+r = await run('0.0.1', sha1);
+check('unrecorded v2 folder -> v1: reuses the chunks v2 shares with v1', r.downloadedChunks <= 3 && r.reusedChunks >= 5, brief(r));
+check('...and every v1 file is right', Object.entries(tree(v1)).every(([p, h]) => tree(dir)[p] === h));
+
 // tampered manifest fingerprint, path escape
 await run('0.0.1', 'f'.repeat(64)).then(() => check('wrong manifest fingerprint refused', false), e => check('wrong manifest fingerprint refused', /fingerprint/.test(e.message)));
 console.log(failed ? `${failed} FAILED` : 'ALL PASSED');

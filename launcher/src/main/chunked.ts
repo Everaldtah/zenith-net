@@ -16,6 +16,7 @@ export interface ManifestChunk { hash: string; size: number; csize: number }
 export interface ManifestFile { path: string; size: number; sha256: string; chunks: ManifestChunk[] }
 export interface Manifest {
   format: number; game: string; edition: string; version: string; exe: string; codec: string; chunk_path: string;
+  chunker?: { id: string; min: number; avg: number; max: number };
   totals: { files: number; size: number; chunks: number; download_size: number };
   files: ManifestFile[];
 }
@@ -88,6 +89,49 @@ async function writeAll(fh: fs.promises.FileHandle, data: Buffer, offset: number
   }
 }
 const statOrNull = (p: string) => fsp.stat(p).catch(() => null);
+
+// ---- the publisher's chunker (scripts/chunker.mjs), to find reusable chunks in files nothing describes.
+// Must cut exactly like the publisher: same table, masks and limits, or nothing found here would match a manifest.
+const GEAR = new Uint32Array(256);
+for (let i = 0; i < 256; i++) GEAR[i] = crypto.createHash('sha256').update(`zenith-cdc-v1:${i}`).digest().readUInt32LE(0);
+const MASK_HARD = 0xfffffe00 >>> 0, MASK_EASY = 0xffffe000 >>> 0;
+interface Chunker { id: string; min: number; avg: number; max: number }
+
+function nextCut(buf: Buffer, start: number, end: number, last: boolean, c: Chunker) {
+  const n = end - start;
+  if (n <= c.min) return last ? n : 0;
+  if (!last && n < c.max) return 0;
+  const limit = Math.min(n, c.max), mid = Math.min(limit, c.avg);
+  let h = 0, i = c.min - 64;
+  for (; i < c.min; i++) h = ((h << 1) + GEAR[buf[start + i]]) >>> 0;
+  for (; i < mid; i++) { h = ((h << 1) + GEAR[buf[start + i]]) >>> 0; if ((h & MASK_HARD) === 0) return i + 1; }
+  for (; i < limit; i++) { h = ((h << 1) + GEAR[buf[start + i]]) >>> 0; if ((h & MASK_EASY) === 0) return i + 1; }
+  return limit;
+}
+
+/** Cuts a file the publisher's way and reports each chunk's hash and position. */
+async function scanChunks(file: string, c: Chunker, onChunk: (hash: string, offset: number, size: number) => void, check: () => void) {
+  const fh = await fsp.open(file, 'r');
+  const cap = c.max * 4, buf = Buffer.allocUnsafe(cap);
+  let start = 0, end = 0, pos = 0, eof = false, offset = 0;
+  try {
+    for (;;) {
+      while (!eof && end - start < c.max) {
+        if (start > 0) { buf.copyWithin(0, start, end); end -= start; start = 0; }
+        const { bytesRead } = await fh.read(buf, end, cap - end, pos);
+        if (bytesRead === 0) eof = true;
+        end += bytesRead; pos += bytesRead;
+      }
+      if (end === start) break;
+      check();
+      const len = nextCut(buf, start, end, eof, c);
+      onChunk(sha(buf.subarray(start, start + len)), offset, len);
+      start += len; offset += len;
+    }
+  } finally {
+    await fh.close();
+  }
+}
 
 interface Target { f: ManifestFile; final: string; part: string; mode: 'ok' | 'inplace' | 'staged'; offsets: number[] }
 interface Slot { t: Target; offset: number }
@@ -188,6 +232,27 @@ export async function syncInstall(o: SyncOptions): Promise<SyncResult> {
         if (!st?.isFile() || st.size !== f.size) continue;
         let off = 0;
         for (const c of f.chunks) { if (!have.has(c.hash)) have.set(c.hash, { file: p, offset: off }); off += c.size; }
+      }
+    }
+
+    // files on disk that nothing describes (an install the launcher didn't make, a copied or changed file): cut them the
+    // way the publisher does and reuse every chunk the new version still has
+    if (m.chunker?.id === 'gear32-v1' && [...needs.keys()].some(h => !have.has(h))) {
+      const oldSize = new Map<string, number>(old ? old.files.map(f => [f.path, f.size]) : []);
+      const unknown: { file: string; size: number }[] = [];
+      for (const t of targets) {
+        if (t.mode !== 'staged' || t.f.size === 0) continue;
+        const st = await statOrNull(t.final);
+        if (st?.isFile() && st.size > 0 && oldSize.get(t.f.path) !== st.size) unknown.push({ file: t.final, size: st.size });
+      }
+      const unknownTotal = unknown.reduce((s, u) => s + u.size, 0);
+      let seen = 0;
+      for (const u of unknown) {
+        await scanChunks(u.file, m.chunker, (hash, offset, size) => {
+          if (needs.has(hash) && !have.has(hash)) have.set(hash, { file: u.file, offset });
+          seen += size;
+          emit('verify', seen, unknownTotal);
+        }, check).catch(e => { if (signal.aborted) throw e; });       // an unreadable file is simply not a source
       }
     }
 
